@@ -1,0 +1,30 @@
+{
+  "name": "mailer2",
+  "version": "0.0.1",
+  "description": "It's a email microservice with grpc interface.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/xy02/mailer2.git"
+  },
+  "keywords": [
+    "mail",
+    "email",
+    "grpc",
+    "microservice"
+  ],
+  "author": "xy02",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/xy02/mailer2/issues"
+  },
+  "homepage": "https://github.com/xy02/mailer2#readme",
+  "dependencies": {
+    "grpc": "^1.10.0",
+    "markdown-it": "^8.4.1",
+    "nodemailer": "^4.6.3"
+  }
+}

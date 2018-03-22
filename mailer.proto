@@ -1,0 +1,43 @@
+syntax = "proto3";
+
+package mailer;
+
+service Mailer {
+    //without attachment
+    rpc Send (EmailInfo) returns (SendResponse) {}
+    //chunk data should little than 200K
+    rpc SendWithAttachment (stream EmailData) returns (SendResponse) {}
+}
+
+message EmailInfo{
+    string subject = 1;
+    string from = 2;
+    repeated string to = 3;
+    map<string, string> headers = 4;
+    string text = 5;
+    oneof alternative {
+        string html = 6;
+        string markdown = 7;
+    }
+}
+
+message SendResponse {}
+
+message EmailData {
+    oneof data {
+        EmailInfo info = 1;
+        AttachmentNameMap  attachment_name_map = 2;
+        AttachmentChunk attachment_chunk = 3;
+    }
+}
+
+message AttachmentNameMap {
+    int32 attachment_key = 1;
+    string filename = 2;
+}
+
+message AttachmentChunk {
+    int32 attachment_key = 1;
+    //chunk data should little than 200K
+    bytes data = 2;
+}
