@@ -1,9 +1,11 @@
 const md = require('markdown-it')()
 const nodemailer = require('nodemailer')
 const grpc = require('grpc')
-const PROTO_PATH = __dirname + '/mailer.proto'
-const proto = grpc.load(PROTO_PATH)
 const fs = require('fs')
+const path = require("path")
+const PROTO_PATH = path.join(__dirname, 'mailer.proto')
+// const PROTO_PATH = __dirname + '/mailer.proto'
+const proto = grpc.load(PROTO_PATH)
 
 const emailUser = "xyxy0202@qq.com"
 // create reusable transporter object using the default SMTP transport
@@ -23,11 +25,12 @@ server.addService(proto.mailer.Mailer.service, {
 })
 server.bind('0.0.0.0:6666', grpc.ServerCredentials.createSsl(null, [
     {
-        private_key: fs.readFileSync("./xy_pri_key.pem"),
-        cert_chain: fs.readFileSync("./xy_ca.crt"),
+        private_key: fs.readFileSync(path.join(__dirname,"xy_pri_key.pem")),
+        cert_chain: fs.readFileSync(path.join(__dirname,"xy_ca.crt")),
     },
 ]))
 server.start()
+console.log(new Date(), "--------Start Mailer2--------")
 
 //send email
 function send(call, callback) {
