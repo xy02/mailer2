@@ -19,6 +19,8 @@ message EmailInfo{
         string html = 6;
         string markdown = 7;
     }
+    //if it is not empty, limit sending interval
+    string user_ip = 8;
 }
 
 message SendResponse {}

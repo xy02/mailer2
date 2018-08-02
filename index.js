@@ -7,34 +7,62 @@ const PROTO_PATH = path.join(__dirname, 'mailer.proto')
 // const PROTO_PATH = __dirname + '/mailer.proto'
 const proto = grpc.load(PROTO_PATH)
 
-const emailUser = "xyxy0202@qq.com"
+const config = require('./config')
+
+const emailUser = config.SMTP.auth.user
 // create reusable transporter object using the default SMTP transport
-const transporter = nodemailer.createTransport({
-    host: 'smtp.qq.com',
-    secure: true, // true for 465, false for other ports
-    auth: {
-        user: emailUser,
-        pass: "clifqvoarmlibhah",
-    }
-})
+// const transporter = nodemailer.createTransport({
+//     host: 'smtp.qq.com',
+//     secure: true, // true for 465, false for other ports
+//     auth: {
+//         user: emailUser,
+//         pass: "clifqvoarmlibhah",
+//     }
+// })
+const transporter = nodemailer.createTransport(config.SMTP)
 
 let server = new grpc.Server()
 server.addService(proto.mailer.Mailer.service, {
     send: send,
     sendWithAttachment: sendWithAttachment,
 })
-server.bind('0.0.0.0:6666', grpc.ServerCredentials.createSsl(null, [
+server.bind(config.serverAddress, grpc.ServerCredentials.createSsl(null, [
     {
-        private_key: fs.readFileSync(path.join(__dirname,"xy_pri_key.pem")),
-        cert_chain: fs.readFileSync(path.join(__dirname,"xy_ca.crt")),
+        private_key: fs.readFileSync(path.join(__dirname,config.pritvateKey)),
+        cert_chain: fs.readFileSync(path.join(__dirname,config.cert)),
     },
 ]))
 server.start()
 console.log(new Date(), "--------Start Mailer2--------")
 
+//ip:lasttime
+let ipMap = {}
+
+setInterval(()=>{
+    for(let i in ipMap){
+        let lasttime = ipMap[i]
+        let now = Date.now()
+        if(lasttime && now - lasttime > config.ipLimitSecond*1000 ){
+            delete ipMap[i]
+        }
+    }
+}, config.ipLimitSecond * 30 * 1000)
+
 //send email
 function send(call, callback) {
     let req = call.request
+    //check ip
+    let ip = req.user_ip
+    console.log(req.user_ip, req.userIp)
+    if (ip){
+        let lasttime = ipMap[ip]
+        let now = Date.now()
+        if(lasttime && now - lasttime < config.ipLimitSecond*1000 ){
+            return callback(new Error("too fast"))
+        }
+        ipMap[ip] = now
+    }
+
     let from = req.from
     if (!from)
         from = emailUser
