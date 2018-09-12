@@ -26,12 +26,17 @@ server.addService(proto.mailer.Mailer.service, {
     send: send,
     sendWithAttachment: sendWithAttachment,
 })
-server.bind(config.serverAddress, grpc.ServerCredentials.createSsl(null, [
-    {
-        private_key: fs.readFileSync(path.join(__dirname,config.pritvateKey)),
-        cert_chain: fs.readFileSync(path.join(__dirname,config.cert)),
-    },
-]))
+if(config.pritvateKey && config.cert){
+    server.bind(config.serverAddress, grpc.ServerCredentials.createSsl(null, [
+        {
+            private_key: fs.readFileSync(path.join(__dirname,config.pritvateKey)),
+            cert_chain: fs.readFileSync(path.join(__dirname,config.cert)),
+        },
+    ]))
+}else{
+    server.bind(config.serverAddress, grpc.ServerCredentials.createInsecure())
+}
+
 server.start()
 console.log(new Date(), "--------Start Mailer2--------")
 
@@ -53,7 +58,7 @@ function send(call, callback) {
     let req = call.request
     //check ip
     let ip = req.user_ip
-    console.log(req.user_ip, req.userIp)
+    // console.log(req.user_ip, req.userIp)
     if (ip){
         let lasttime = ipMap[ip]
         let now = Date.now()
@@ -76,11 +81,14 @@ function send(call, callback) {
     switch (req.alternative) {
         case 'html': {
             message.html = req.html
+            break
         }
         case 'markdown': {
             message.html = md.render(req.markdown)
+            break
         }
     }
+    console.log("sending", message)
     // send mail with defined transport object
     transporter.sendMail(message, (error, info) => {
         if (error) {

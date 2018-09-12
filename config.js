@@ -7,8 +7,8 @@ module.exports = {
             pass: "clifqvoarmlibhah",
         }
     },
-    pritvateKey: "xy_pri_key.pem",
-    cert:"xy_ca.crt",
+    // pritvateKey: "xy_pri_key.pem",
+    // cert:"xy_ca.crt",
     serverAddress:"0.0.0.0:6666",
     ipLimitSecond: 10,
 }
